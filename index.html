@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Math Problem Solver</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/algebrite@1.4.0/dist/algebrite.bundle-for-browser.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#0b1220;color:#e5e7eb;min-height:100vh;padding:20px}h1{text-align:center;color:#11a8a0;font-size:1.8rem;font-weight:400;margin-bottom:6px}.sub{text-align:center;color:#94a3b8;font-size:0.9rem;margin-bottom:20px}.container{max-width:700px;margin:0 auto}.card{background:#141d2b;border:2px solid #2d3a4f;border-radius:12px;padding:20px;margin-bottom:16px}.card label{color:#94a3b8;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px}input[type=text]{width:100%;padding:12px;margin-top:8px;background:#0b1220;color:#e5e7eb;border:1px solid #2d3a4f;border-radius:8px;font:15px Consolas,monospace}input:focus{outline:none;border-color:#11a8a0}.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font:inherit;font-size:0.9rem}.btn-solve{background:#11a8a0;color:white;font-weight:600}.btn-clear{background:#2d3a4f;color:#94a3b8}.examples{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.ex{padding:5px 10px;font:12px Consolas,monospace;background:#141d2b;color:#a78bfa;border:1px solid #a78bfa;border-radius:6px;cursor:pointer}#output{margin-top:10px;font:14px/1.8 Consolas,monospace;white-space:pre-wrap}.footer{text-align:center;margin-top:20px;font-size:0.8rem;color:#64748b}.footer a{color:#11a8a0;text-decoration:none}
 </style>
@@ -13,15 +14,93 @@
 <div class="container">
 <h1>Math Problem Solver</h1>
 <div class="sub">Enter a math problem - get a step-by-step solution</div>
-<div class="card"><label>Enter your problem:</label><input type="text" id="input" placeholder="e.g. x^2 - 4" autofocus/><div class="btn-row"><button class="btn btn-solve" onclick="solve()">Solve</button><button class="btn btn-clear" onclick="clearAll()">Clear</button></div><div class="examples"><button class="ex" onclick="tryEx('x^2-4')">x^2-4</button><button class="ex" onclick="tryEx('2*x^2+3*x-5')">2x^2+3x-5</button><button class="ex" onclick="tryEx('sin(pi/4)')">sin(pi/4)</button><button class="ex" onclick="tryEx('sqrt(144)')">sqrt(144)</button><button class="ex" onclick="tryEx('5!')">5!</button><button class="ex" onclick="tryEx('det([[1,2],[3,4]])')">det(matrix)</button></div></div>
+<div class="card"><label>Enter your problem:</label><input type="text" id="input" placeholder="e.g. x+2=3 or x^2-4=0" autofocus/><div class="btn-row"><button class="btn btn-solve" onclick="solve()">Solve</button><button class="btn btn-clear" onclick="clearAll()">Clear</button></div><div class="examples"><button class="ex" onclick="tryEx('x+2=3')">x+2=3</button><button class="ex" onclick="tryEx('x^2-4=0')">x^2-4=0</button><button class="ex" onclick="tryEx('2*x^2+3*x-5=0')">2x^2+3x-5=0</button><button class="ex" onclick="tryEx('sin(pi/4)')">sin(pi/4)</button><button class="ex" onclick="tryEx('sqrt(144)')">sqrt(144)</button><button class="ex" onclick="tryEx('5!')">5!</button><button class="ex" onclick="tryEx('x^2-4')">simplify x^2-4</button></div></div>
 <div class="card"><label>Solution:</label><div id="output">Click an example or type a problem...</div></div>
-<div class="footer">&copy; Developed by Shir Sivroni | All rights reserved
+<div class="footer">&copy; Developed by Shir Sivroni<br><a href="https://shir-openu.github.io/">Portfolio</a> | <a href="https://github.com/shir-openu/math-solver">Source Code</a></div>
 </div>
 <script>
-document.getElementById('input').addEventListener('keydown',function(e){if(e.key==='Enter')solve()});
-function tryEx(t){document.getElementById('input').value=t;solve()}
-function clearAll(){document.getElementById('input').value='';document.getElementById('output').textContent='Click an example or type a problem...'}
-function solve(){var input=document.getElementById('input').value.trim();if(!input)return;var L=['Input: '+input,'----------------------------------------',''];try{var result=math.evaluate(input);L.push('Step 1: Parse expression');L.push('   '+input);L.push('');try{var s=math.simplify(input);if(s.toString()!==input){L.push('Step 2: Simplify');L.push('   = '+s.toString());L.push('')}}catch(e){}if(input.includes('x')){try{var d=math.derivative(input,'x');L.push('Derivative: d/dx = '+d.toString());L.push('')}catch(e){}}L.push('Final Answer: '+math.format(result,{precision:10}))}catch(e){try{var s=math.simplify(input);L.push('Simplify: '+input);L.push('   = '+s.toString());try{var d=math.derivative(input,'x');L.push('Derivative: d/dx = '+d.toString())}catch(e2){}L.push('');L.push('Final Answer: '+s.toString())}catch(e2){L.push('Error: Could not parse "'+input+'"');L.push('Try: 2+3*4, x^2-4, sin(pi/4), sqrt(16), 5!')}}document.getElementById('output').textContent=L.join('\n')}
+document.getElementById("input").addEventListener("keydown",function(e){if(e.key==="Enter")solve()});
+function tryEx(t){document.getElementById("input").value=t;solve()}
+function clearAll(){document.getElementById("input").value="";document.getElementById("output").textContent="Click an example or type a problem..."}
+
+function solve(){
+  var input=document.getElementById("input").value.trim();
+  if(!input)return;
+  var L=["Input: "+input,"----------------------------------------",""];
+
+  if(input.indexOf("=")!==-1 && input.indexOf("==")===-1){
+    var parts=input.split("=");
+    var left=parts[0].trim();
+    var right=parts[1].trim();
+    L.push("Step 1: Rearrange equation");
+    L.push("   "+left+" = "+right);
+    var expr="("+left+")-("+right+")";
+    L.push("   "+expr+" = 0");
+    L.push("");
+    try{
+      var solutions=Algebrite.run("roots("+expr+", x)");
+      L.push("Step 2: Solve for x");
+      L.push("   Solutions: "+solutions);
+      L.push("");
+      var solArr=solutions.replace(/[\[\]]/g,"").split(",");
+      L.push("Step 3: Verify");
+      for(var i=0;i<solArr.length;i++){
+        var sol=solArr[i].trim();
+        if(sol){
+          try{
+            var lv=Algebrite.run("eval("+left+",x,"+sol+")");
+            var rv=Algebrite.run("eval("+right+",x,"+sol+")");
+            L.push("   x = "+sol+": "+left+" = "+lv+", "+right+" = "+rv+" [OK]");
+          }catch(e){L.push("   x = "+sol)}
+        }
+      }
+      L.push("");
+      L.push("Final Answer: x = "+solutions);
+    }catch(e){
+      try{
+        var nr=Algebrite.run("nroots("+expr+")");
+        L.push("Numerical roots: "+nr);
+        L.push("");
+        L.push("Final Answer: x = "+nr);
+      }catch(e2){L.push("Could not solve this equation.")}
+    }
+    document.getElementById("output").textContent=L.join("\n");
+    return;
+  }
+
+  try{
+    var result=math.evaluate(input);
+    L.push("Step 1: Parse expression");
+    L.push("   "+input);
+    L.push("");
+    try{var s=math.simplify(input);if(s.toString()!==input){L.push("Step 2: Simplify");L.push("   = "+s.toString());L.push("")}}catch(e){}
+    if(input.indexOf("x")!==-1){try{var d=math.derivative(input,"x");L.push("Derivative: d/dx = "+d.toString());L.push("")}catch(e){}}
+    L.push("Final Answer: "+math.format(result,{precision:10}));
+  }catch(e){
+    try{
+      var s=math.simplify(input);
+      L.push("Simplify: "+input);L.push("   = "+s.toString());
+      try{var d=math.derivative(input,"x");L.push("Derivative: d/dx = "+d.toString())}catch(e2){}
+      L.push("");L.push("Final Answer: "+s.toString());
+    }catch(e2){
+      try{
+        var r=Algebrite.run("simplify("+input+")");
+        L.push("Simplify: "+r);
+        try{var d2=Algebrite.run("d("+input+",x)");L.push("Derivative: d/dx = "+d2)}catch(e3){}
+        L.push("");L.push("Final Answer: "+r);
+      }catch(e3){
+        L.push("Error: Could not parse the input.");
+        L.push("");
+        L.push("Supported formats:");
+        L.push("  Equations:  x+2=3, x^2-4=0, 2*x+1=7");
+        L.push("  Arithmetic: 2+3*4, sqrt(16), 5!");
+        L.push("  Simplify:   x^2-4, (x+1)^2");
+        L.push("  Functions:  sin(pi/4), log(100,10)");
+      }
+    }
+  }
+  document.getElementById("output").textContent=L.join("\n");
+}
 </script>
 </body>
 </html>
