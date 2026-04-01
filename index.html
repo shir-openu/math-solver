@@ -15,7 +15,7 @@
 <div class="sub">Enter a math problem - get a step-by-step solution</div>
 <div class="card"><label>Enter your problem:</label><input type="text" id="input" placeholder="e.g. x^2 - 4" autofocus/><div class="btn-row"><button class="btn btn-solve" onclick="solve()">Solve</button><button class="btn btn-clear" onclick="clearAll()">Clear</button></div><div class="examples"><button class="ex" onclick="tryEx('x^2-4')">x^2-4</button><button class="ex" onclick="tryEx('2*x^2+3*x-5')">2x^2+3x-5</button><button class="ex" onclick="tryEx('sin(pi/4)')">sin(pi/4)</button><button class="ex" onclick="tryEx('sqrt(144)')">sqrt(144)</button><button class="ex" onclick="tryEx('5!')">5!</button><button class="ex" onclick="tryEx('det([[1,2],[3,4]])')">det(matrix)</button></div></div>
 <div class="card"><label>Solution:</label><div id="output">Click an example or type a problem...</div></div>
-<div class="footer">Developed by Shir Sivroni
+<div class="footer">&copy; Developed by Shir Sivroni | All rights reserved
 </div>
 <script>
 document.getElementById('input').addEventListener('keydown',function(e){if(e.key==='Enter')solve()});
